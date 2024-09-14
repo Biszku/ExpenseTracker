@@ -1,19 +1,23 @@
 import Operations.Operation;
 
-public class TaskTracker {
+public class ExpenseTracker {
 
-    private CommandHandler commandHandler;
+    private final CommandHandler commandHandler;
 
-    public TaskTracker() {
+    public ExpenseTracker() {
         commandHandler = new CommandHandler();
     }
 
     public void start() {
 
         while (true) {
-            String operationType = commandHandler.readCommand();
-            Operation operation = OperationFactory.createOperation(operationType);
-            operation.execute();
+            try {
+                String operationType = commandHandler.readCommand();
+                Operation operation = OperationFactory.createOperation(operationType);
+                operation.execute(operationType);
+            } catch (ErrorHandler e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 }
