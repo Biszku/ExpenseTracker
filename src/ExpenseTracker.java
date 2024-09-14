@@ -11,7 +11,6 @@ public class TaskTracker {
     public void start() {
 
         while (true) {
-
             String operationType = commandHandler.readCommand();
             Operation operation = OperationFactory.createOperation(operationType);
             operation.execute();
