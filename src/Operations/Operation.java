@@ -1,5 +1,5 @@
 package Operations;
 
 public interface Operation {
-    void execute();
+    void execute(String command);
 }
