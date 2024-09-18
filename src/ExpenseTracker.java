@@ -60,24 +60,25 @@ public class ExpenseTracker {
 
     private void addTransaction() {
 
-        boolean isDescriptionValid = validate("^--description\\s\"\\w+\".*", command);
-        if (!isDescriptionValid) {
-            throw new IllegalArgumentException("\u001B[31mInvalid description! " +
-                    "Enter description in format: --description \"<description>\"\u001B[0m");
-        }
-        command = command.replaceAll("--description\\s", "");
-        String description = removeBoundCommandElement();
-
-        boolean isAmountValid = validate("^--amount\\s\\d+$", command);
-        if (!isAmountValid) {
-            throw new IllegalArgumentException("\u001B[31mInvalid amount! " +
-                    "Enter amount in format: --amount <amount>\u001B[0m");
-        }
-        command = command.replaceAll("--amount\\s", "");
-        double amount = Double.parseDouble(removeBoundCommandElement());
+        String description = retrieveParamValue("description");
+        double amount = Double.parseDouble(retrieveParamValue("description"));
 
         Transaction transaction = new Transaction(++id, description, amount);
         transactions.add(transaction);
+    }
+
+    private String retrieveParamValue(String param) {
+
+        String suffix = param.equals("description") ? "\"\\w+\".*" : "\\d+$";
+        String errorSuffix = param.equals("description") ? "\"<description>\"\u001B[0m" : "<amount>\u001B[0m";
+        boolean isParamValid = validate("^--" + param + "\\s" + suffix, command);
+
+        if (!isParamValid) {
+            throw new IllegalArgumentException("\u001B[31mInvalid "+ param +"! " +
+                    "Enter "+param+" in format: --"+param+" "+errorSuffix);
+        }
+        command = command.replaceAll("--"+param+"\\s", "");
+        return removeBoundCommandElement();
     }
 
     public boolean validate(String regex, String text) {
