@@ -16,7 +16,7 @@ public class ExpenseTracker {
         id = 0;
     }
 
-    public void start() {
+    public void run() {
 
         while (true) {
 
