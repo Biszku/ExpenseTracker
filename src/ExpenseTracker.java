@@ -1,3 +1,4 @@
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -7,7 +8,6 @@ import java.util.regex.Pattern;
 public class ExpenseTracker {
 
     private static int id;
-    private static final Scanner scanner = new Scanner(System.in);
     private String command;
     private final List<Transaction> transactions;
 
@@ -30,8 +30,9 @@ public class ExpenseTracker {
                     case "delete" -> deleteTransaction();
                     case "list" -> printTransactions();
                     case "summary" -> printSummary();
-                    default -> throw new IllegalArgumentException("\u001B[31mInvalid operation! " +
-                            "Enter add, update, delete, list or summary\u001B[0m");
+                    default -> throw new IllegalArgumentException("\u001B[31mInvalid operation type!\n" +
+                            "List of operations " +
+                            "\"add\", \"update\", \"delete\", \"list\", \"summary\"\u001B[0m");
                 }
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
@@ -41,14 +42,20 @@ public class ExpenseTracker {
 
     private String readInput() {
 
+        Scanner scanner = setInputSource(System.in);
         String input = scanner.nextLine();
-        boolean isValid = validate("^expense-tracker\\s.*", input);
+        boolean isValid = validate("^expense-tracker.*", input);
         if (!isValid) {
-            throw new IllegalArgumentException("\u001B[31mInvalid syntax! " +
-                    "Enter command in format \"expense-tracker <commandType> <commandArgs>\"\u001B[0m");
+            throw new IllegalArgumentException("\u001B[31mInvalid syntax!\n" +
+                    "Enter command in format \"expense-tracker <operationType> <commandArgs>\"\u001B[0m");
         }
         input = removeBoundCommandElement(input);
         return input;
+    }
+
+    private Scanner setInputSource(InputStream inputStream) {
+        Scanner scanner = new Scanner(inputStream);
+        return scanner;
     }
 
     private void addTransaction() {
