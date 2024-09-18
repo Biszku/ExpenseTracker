@@ -61,7 +61,7 @@ public class ExpenseTracker {
     private void addTransaction() {
 
         String description = retrieveParamValue("description");
-        double amount = Double.parseDouble(retrieveParamValue("description"));
+        double amount = Double.parseDouble(retrieveParamValue("amount"));
 
         Transaction transaction = new Transaction(++id, description, amount);
         transactions.add(transaction);
@@ -70,11 +70,11 @@ public class ExpenseTracker {
     private String retrieveParamValue(String param) {
 
         String suffix = param.equals("description") ? "\"\\w+\".*" : "\\d+$";
-        String errorSuffix = param.equals("description") ? "\"<description>\"\u001B[0m" : "<amount>\u001B[0m";
+        String errorSuffix = param.equals("description") ? "<\"value\">\u001B[0m" : "<amount>\u001B[0m";
         boolean isParamValid = validate("^--" + param + "\\s" + suffix, command);
 
         if (!isParamValid) {
-            throw new IllegalArgumentException("\u001B[31mInvalid "+ param +"! " +
+            throw new IllegalArgumentException("\u001B[31mInvalid "+ param +"!\n" +
                     "Enter "+param+" in format: --"+param+" "+errorSuffix);
         }
         command = command.replaceAll("--"+param+"\\s", "");
