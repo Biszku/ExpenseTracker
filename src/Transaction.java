@@ -1,13 +1,30 @@
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
 
-public record Transaction (int id, String date, String description, double amount) {
+public class Transaction implements Comparable<Transaction> {
 
-    private static DateTimeFormatter formatter =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
+    private int id;
+    private String description;
+    private double amount;
+    private LocalDate date;
 
     public Transaction (int id, String description, double amount) {
-        this(id, LocalDateTime.now().format(formatter), description, amount);
+        this.id = id;
+        this.description = description;
+        this.amount = amount;
+        this.date = LocalDate.now();
+    }
+
+    public void updateTransaction(String description, double amount) {
+        this.description = description;
+        this.amount = amount;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public int compareTo(Transaction o) {
+        return id;
     }
 }

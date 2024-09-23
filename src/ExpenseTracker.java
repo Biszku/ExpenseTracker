@@ -1,29 +1,26 @@
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
 public class ExpenseTracker {
 
     private static int id;
-    private String command;
+    private final List<String> commands;
     private final List<Transaction> transactions;
 
-    public ExpenseTracker() {
-        transactions = new ArrayList<>();
+    public ExpenseTracker(List<String> commands) {
         id = 0;
+        this.commands = commands;
+        transactions = new ArrayList<>();
     }
 
     public void run() {
 
-        while (true) {
-
             try {
-
-                command = readInput();
-                String operationType = removeBoundCommandElement();
+                if (commands.isEmpty()) {
+                    throw new IllegalArgumentException("\u001B[31m" +
+                            "No operation provided!" +
+                            "\u001B[0m");
+                }
+                String operationType = commands.remove(0);
                 switch (operationType) {
                     case "add" -> addTransaction();
                     case "update" -> updateTransaction();
@@ -37,78 +34,91 @@ public class ExpenseTracker {
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }
-        }
-    }
-
-    private String readInput() {
-
-        Scanner scanner = setInputSource(System.in);
-        String input = scanner.nextLine();
-        boolean isValid = validate("^expense-tracker.*", input);
-        if (!isValid) {
-            throw new IllegalArgumentException("\u001B[31mInvalid syntax!\n" +
-                    "Enter command in format \"expense-tracker <operationType> <commandArgs>\"\u001B[0m");
-        }
-        input = removeBoundCommandElement(input);
-        return input;
-    }
-
-    private Scanner setInputSource(InputStream inputStream) {
-        Scanner scanner = new Scanner(inputStream);
-        return scanner;
     }
 
     private void addTransaction() {
 
-        String description = retrieveParamValue("description");
-        double amount = Double.parseDouble(retrieveParamValue("amount"));
+        try {
+            String description = commands.get(1).replaceAll("\"", "");
+            double amount = Double.parseDouble(commands.get(3));
 
-        Transaction transaction = new Transaction(++id, description, amount);
-        transactions.add(transaction);
-    }
+            if (description.isEmpty() || amount < 0) {
+                throw new IllegalArgumentException("\u001B[31m" +
+                        "Invalid transaction data!" +
+                        "\u001B[0m");
+            }
 
-    private String retrieveParamValue(String param) {
-
-        String suffix = param.equals("description") ? "\"\\w+\".*" : "\\d+$";
-        String errorSuffix = param.equals("description") ? "<\"value\">\u001B[0m" : "<amount>\u001B[0m";
-        boolean isParamValid = validate("^--" + param + "\\s" + suffix, command);
-
-        if (!isParamValid) {
-            throw new IllegalArgumentException("\u001B[31mInvalid "+ param +"!\n" +
-                    "Enter "+param+" in format: --"+param+" "+errorSuffix);
+            Transaction transaction = new Transaction(++id, description, amount);
+            transactions.add(transaction);
+        } catch (IndexOutOfBoundsException e) {
+            throw new IllegalArgumentException("\u001B[31m" +
+                    "Not enough arguments provided!" +
+                    "\u001B[0m");
         }
-        command = command.replaceAll("--"+param+"\\s", "");
-        return removeBoundCommandElement();
-    }
-
-    public boolean validate(String regex, String text) {
-
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(text);
-        return matcher.matches();
-    }
-
-    private String removeBoundCommandElement() {
-
-        String[] commands = command.split(" ");
-        String boundCommandElement = commands[0];
-        String boundaryOperation = commands.length < 2 ? "." : "^" + boundCommandElement + "\\s";
-        command = command.replaceAll(boundaryOperation, "");
-        return boundCommandElement;
-    }
-
-    private String removeBoundCommandElement(String command) {
-
-        String boundCommandElement = command.split(" ")[0];
-        return command.replaceAll(boundCommandElement + "\\s", "");
     }
 
     private void updateTransaction() {
-        System.out.println("Updating transaction...");
+
+        try {
+            int id = Integer.parseInt(commands.get(1));
+            String description = commands.get(3).replaceAll("\"", "");
+            double amount = Double.parseDouble(commands.get(5));
+
+            if (description.isEmpty() || amount < 0) {
+                throw new IllegalArgumentException("\u001B[31m" +
+                        "Invalid transaction data!" +
+                        "\u001B[0m");
+            }
+
+            Transaction transaction = findTransaction(id);
+            if (transaction == null) {
+                throw new IllegalArgumentException("\u001B[31m" +
+                        "Transaction with id " + id + " not found!" +
+                        "\u001B[0m");
+            }
+            transaction.updateTransaction(description, amount);
+        } catch (IndexOutOfBoundsException e) {
+            throw new IllegalArgumentException("\u001B[31m" +
+                    "Not enough arguments provided!" +
+                    "\u001B[0m");
+        }
     }
 
     private void deleteTransaction() {
-        System.out.println("Deleting transaction...");
+
+            try {
+                int id = Integer.parseInt(commands.get(1));
+
+                Transaction transaction = findTransaction(id);
+                if (transaction == null) {
+                    throw new IllegalArgumentException("\u001B[31m" +
+                            "Transaction with id " + id + " not found!" +
+                            "\u001B[0m");
+                }
+                transactions.remove(transaction);
+            } catch (IndexOutOfBoundsException e) {
+                throw new IllegalArgumentException("\u001B[31m" +
+                        "Not enough arguments provided!" +
+                        "\u001B[0m");
+            }
+    }
+
+    private Transaction findTransaction(int id) {
+        int left = 0;
+        int right = transactions.size() - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            Transaction transaction = transactions.get(mid);
+            if (transaction.getId() == id) {
+                return transaction;
+            }
+            if (id > transaction.getId()) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return null;
     }
 
     private void printTransactions() {
