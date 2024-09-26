@@ -3,7 +3,7 @@
 ## Description
 
 This is a simple expense tracker application that allows users to add, update,
-delete, list all expenses and display either expenses summary or expenses summary 
+delete, list all expenses and display either general expenses summary or expenses summary 
 by month.
 
 ## Features
