@@ -3,10 +3,10 @@ import java.util.*;
 public class ExpenseTracker {
 
     private static int id;
-    private final List<String> commands;
+    private final String[] commands;
     private final List<Transaction> transactions;
 
-    public ExpenseTracker(List<String> commands) {
+    public ExpenseTracker(String[] commands) {
         id = 0;
         this.commands = commands;
         transactions = new ArrayList<>();
@@ -15,12 +15,12 @@ public class ExpenseTracker {
     public void run() {
 
             try {
-                if (commands.isEmpty()) {
+                if (commands.length == 0) {
                     throw new IllegalArgumentException("\u001B[31m" +
                             "No operation provided!" +
                             "\u001B[0m");
                 }
-                String operationType = commands.remove(0);
+                String operationType = commands[0];
                 switch (operationType) {
                     case "add" -> addTransaction();
                     case "update" -> updateTransaction();
@@ -39,8 +39,8 @@ public class ExpenseTracker {
     private void addTransaction() {
 
         try {
-            String description = commands.get(1).replaceAll("\"", "");
-            double amount = Double.parseDouble(commands.get(3));
+            String description = commands[2].replaceAll("\"", "");
+            double amount = Double.parseDouble(commands[4]);
 
             if (description.isEmpty() || amount < 0) {
                 throw new IllegalArgumentException("\u001B[31m" +
@@ -60,9 +60,9 @@ public class ExpenseTracker {
     private void updateTransaction() {
 
         try {
-            int id = Integer.parseInt(commands.get(1));
-            String description = commands.get(3).replaceAll("\"", "");
-            double amount = Double.parseDouble(commands.get(5));
+            int id = Integer.parseInt(commands[2]);
+            String description = commands[4].replaceAll("\"", "");
+            double amount = Double.parseDouble(commands[6]);
 
             if (description.isEmpty() || amount < 0) {
                 throw new IllegalArgumentException("\u001B[31m" +
@@ -87,7 +87,7 @@ public class ExpenseTracker {
     private void deleteTransaction() {
 
             try {
-                int id = Integer.parseInt(commands.get(1));
+                int id = Integer.parseInt(commands[2]);
 
                 Transaction transaction = findTransaction(id);
                 if (transaction == null) {
@@ -122,7 +122,8 @@ public class ExpenseTracker {
     }
 
     private void printTransactions() {
-        System.out.println("Printing transactions...");
+
+        System.out.printf("# %-4s %-12s %-12s %-6s\n", "ID", "Date", "Description", "Amount");
     }
 
     private void printSummary() {

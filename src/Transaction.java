@@ -27,4 +27,9 @@ public class Transaction implements Comparable<Transaction> {
     public int compareTo(Transaction o) {
         return id;
     }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }
